@@ -1,0 +1,155 @@
+Ejercicios
+-------------------------------------
+MySQL Shell 8.0.12
+
+Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type '\help' or '\?' for help; '\quit' to exit.
+
+
+ MySQL  JS > \sql
+Switching to SQL mode... Commands end with ;
+
+ MySQL  SQL > \connect -c root@localhost
+The -c option is deprecated, please use --mysql or -mc instead
+Creating a Classic session to 'root@localhost'
+Please provide the password for 'root@localhost': ****
+Save password for 'root@localhost:3306'? [Y]es/[N]o/Ne[v]er (default No): y
+Fetching schema names for autocompletion... Press ^C to stop.
+Your MySQL connection id is 169
+Server version: 8.0.12 MySQL Community Server - GPL
+No default schema selected; type \use <schema> to set one.
+
+ MySQL  localhost:3306 ssl  SQL > \use northwind
+Default schema set to `northwind`.
+Fetching table and column names from `northwind` for auto-completion... Press ^C to stop.
+
+ MySQL  localhost:3306 ssl  northwind  SQL > select a.customerid, a.companyname
+                                         ... ,sum(c.quantity * c.unitprice) as total
+                                         ... from customers a
+                                         ... inner join orders b on a.customerid = b.customerid
+                                         ... inner join orderdetails c on b.orderid = c.orderid
+                                         ... group by a.customerid
+                                         ... order by total desc limit 1;
++------------+-------------+-------------+
+| customerid | companyname | total       |
++------------+-------------+-------------+
+| QUICK      | QUICK-Stop  | 117483.3900 |
++------------+-------------+-------------+
+1 row in set (0.1161 sec)
+
+ MySQL  localhost:3306 ssl  northwind  SQL > select a.customerid, a.companyname ,sum(c.quantity * c.unitprice) as total from customers a inner join orders b on a.customerid = b.customerid inner join orderdetails c on b.orderid = c.orderid group by a.customerid order by total asc limit 1;
++------------+----------------------------+----------+
+| customerid | companyname                | total    |
++------------+----------------------------+----------+
+| CENTC      | Centro comercial Moctezuma | 100.8000 |
++------------+----------------------------+----------+
+1 row in set (0.0315 sec)
+
+ MySQL  localhost:3306 ssl  northwind  SQL > select a.productid, a.productname, b.quantity
+                                         ... from products a
+                                         ... inner join orderdetails b
+                                         ... on a.productid = b.productid
+                                         ... group by productid
+                                         ... order by quantity desc limit 1;
++-----------+----------------------------+----------+
+| productid | productname                | quantity |
++-----------+----------------------------+----------+
+|         8 | Northwoods Cranberry Sauce |       70 |
++-----------+----------------------------+----------+
+1 row in set (0.1189 sec)
+
+ MySQL  localhost:3306 ssl  northwind  SQL > select a.productid, a.productname,
+                                         ... (b.unitprice * b.quantity) as totalVendido
+                                         ... from products a
+                                         ... inner join orderdetails b on a.productid = b.productid
+                                         ... group by b.productid
+                                         ... order by totalVendido desc limit 1;
++-----------+--------------+--------------+
+| productid | productname  | totalVendido |
++-----------+--------------+--------------+
+|        38 | Cte de Blaye |    4216.0000 |
++-----------+--------------+--------------+
+1 row in set (0.0403 sec)
+
+ MySQL  localhost:3306 ssl  northwind  SQL > select a.productid, a.productname,  (b.unitprice * b.quantity) as totalVendido from products a  inner join orderdetails b on a.productid = b.productid group by b.productid order by totalVendido asc limit 1;
++-----------+----------------------------+--------------+
+| productid | productname                | totalVendido |
++-----------+----------------------------+--------------+
+|        19 | Teatime Chocolate Biscuits |       7.3000 |
++-----------+----------------------------+--------------+
+1 row in set (0.0394 sec)
+
+ MySQL  localhost:3306 ssl  northwind  SQL > select a.productname, a.productid, b.quantity
+                                         ... from products a
+                                         ... inner join orderdetails b on a.productid = b.productid
+                                         ... inner join orders c on b.orderid = c.orderid
+                                         ... where c.customerid = (select a.customerid from customers a
+                                         ... inner join orders b on a.customerid = b.customerid
+                                         ... inner join orderdetails c on b.orderid = c.orderid
+                                         ... group by a.customer id
+                                         ... order by sum(c.unitprice * c.quantity) desc limit 1)
+                                         ... group by productid
+                                         ... order by quantity desc limit 1;
+ERROR: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'id
+order by sum(c.unitprice * c.quantity) desc limit 1)
+group by productid
+order' at line 8
+
+ MySQL  localhost:3306 ssl  northwind  SQL > select a.productname, a.productid, b.quantity  from products a inner join orderdetails b on a.productid = b.productid inner join orders c on b.orderid = c.orderid where c.customerid = (select a.customerid from customers a inner join orders b on a.customerid = b.customerid inner join orderdetails c on b.orderid = c.orderid group by a.customerid order by sum(c.unitprice * c.quantity) desc limit 1) group by productid order by quantity desc limit 1;
++--------------------+-----------+----------+
+| productname        | productid | quantity |
++--------------------+-----------+----------+
+| Schoggi Schokolade |        27 |      120 |
++--------------------+-----------+----------+
+1 row in set (0.0761 sec)
+
+ MySQL  localhost:3306 ssl  northwind  SQL > select a.firstname, a.lastname,
+                                         ... count (b.orderid) as total
+                                         ... from employees a
+                                         ... inner join orders b
+                                         ... on a.employeeid = b.employeeid
+                                         ... group by a.lastname
+                                         ... order by total desc limit 1;
+ERROR: 1630 (42000): FUNCTION northwind.count does not exist. Check the 'Function Name Parsing and Resolution' section in the Reference Manual
+                                             select a.firstname, a.lastname, count(b.orderid) as total from employees a inner join orders b  on a.employeeid = b.employeeid group by a.lastname order by total desc limit 1;
++-----------+----------+-------+n a.employeeid = b.employeeid group by a.lastname order by total desc limit 1;
+| firstname | lastname | total |
++-----------+----------+-------+
+| Margaret  | Peacock  |   156 |
++-----------+----------+-------+
+1 row in set (0.0086 sec)           
+
+ MySQL  localhost:3306 ssl  northwind  SQL > select a.firstname, a.lastname, count(b.orderid) as total from employees a inner join orders b  on a.employeeid = b.employeeid group by a.lastname order by total asc limit 1;
++-----------+----------+-------+
+| firstname | lastname | total |
++-----------+----------+-------+
+| Steven    | Buchanan |    42 |
++-----------+----------+-------+
+1 row in set (0.0085 sec)         
+
+ MySQL  localhost:3306 ssl  northwind  SQL > select a.companyname, b.UnitsInStock, b.UnitsOnOrder
+                                         ... from suppliers a
+                                         ... inner join products b on a.supplierid = b.supplierid
+                                         ... where b.UnitsInStock = 0 and b.UnitsOnOrder =0;
++---------------------------------+--------------+--------------+
+| companyname                     | UnitsInStock | UnitsOnOrder |
++---------------------------------+--------------+--------------+
+| New Orleans Cajun Delights      |            0 |            0 |
+| Pavlova, Ltd.                   |            0 |            0 |
+| Plutzer Lebensmittelgromrkte AG |            0 |            0 |
+| G'day, Mate                     |            0 |            0 |
++---------------------------------+--------------+--------------+
+4 rows in set (0.0485 sec)  
+
+ MySQL  localhost:3306 ssl  northwind  SQL > select a.companyname, (b.UnitPrice*b.UnitsOnOrder) as totalComp from suppliers a inner join products b on a.supplierid = b.supplierid group by a.supplierid order by totalComp desc limit 1;
++-------------+-----------+
+| companyname | totalComp |
++-------------+-----------+
+| Karkki Oy   | 1200.0000 |
++-------------+-----------+
+1 row in set (0.0034 sec)

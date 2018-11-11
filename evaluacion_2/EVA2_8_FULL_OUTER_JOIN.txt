@@ -1,0 +1,471 @@
+EVA2_8_FULL_OUTER_JOIN
+-------------------------------------------
+MySQL Shell 8.0.12
+
+Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type '\help' or '\?' for help; '\quit' to exit.
+
+
+ MySQL  JS > \sql
+Switching to SQL mode... Commands end with ;
+
+ MySQL  SQL > \connect -c root@localhost
+The -c option is deprecated, please use --mysql or -mc instead
+Creating a Classic session to 'root@localhost'
+Please provide the password for 'root@localhost': ****
+Save password for 'root@localhost:3306'? [Y]es/[N]o/Ne[v]er (default No): root
+
+Please pick an option out of [Y]es/[N]o/Ne[v]er (default No):
+Save password for 'root@localhost:3306'? [Y]es/[N]o/Ne[v]er (default No): y
+Fetching schema names for autocompletion... Press ^C to stop.
+Your MySQL connection id is 80
+Server version: 8.0.12 MySQL Community Server - GPL
+No default schema selected; type \use <schema> to set one.
+
+ MySQL  localhost:3306 ssl  SQL > \use evaluacion_2
+Default schema set to `evaluacion_2`.
+Fetching table and column names from `evaluacion_2` for auto-completion... Press ^C to stop.
+
+ MySQL  localhost:3306 ssl  evaluacion_2  SQL > select a.nombre, b.nombre
+                                            ... from tablaa a
+                                            ... left join tablab b
+                                            ... where a.id = b.id
+                                            ... union all
+                                            ... select a.nombre, b.nombre
+                                            ... from tablaa a
+                                            ... right join tablab
+                                            ... on a.id=b.id
+                                            ... where;
+ERROR: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'where a.id = b.id
+union all
+select a.nombre, b.nombre
+from tablaa a
+right join t' at line 4
+
+ MySQL  localhost:3306 ssl  evaluacion_2  SQL > select a.nombre, b.nombre  from tablaa a left join tablab b on a.id = b.id union all select a.nombre, b.nombre from tablaa a right join tablab on a.id=b.id;
+ERROR: 1054 (42S22): Unknown column 'b.nombre' in 'field list'
+
+ MySQL  localhost:3306 ssl  evaluacion_2  SQL > desc tablab;
++--------+------------+------+-----+---------+-------+
+| Field  | Type       | Null | Key | Default | Extra |
++--------+------------+------+-----+---------+-------+
+| id     | int(11)    | YES  |     | NULL    |       |
+| nombre | varchar(5) | YES  |     | NULL    |       |
++--------+------------+------+-----+---------+-------+
+2 rows in set (0.0430 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_2  SQL > select a.nombre, b.nombre  from tablaa a left join tablab b on a.id = b.id union all select a.nombre, b.nombre from tablaa a right join tablab on a.id=b.id;
+ERROR: 1054 (42S22): Unknown column 'b.nombre' in 'field list'
+
+ MySQL  localhost:3306 ssl  evaluacion_2  SQL > select a.nombre, b.nombre  from tablaa a left join tablab b on a.id = b.id union all select a.nombre, b.nombre from tablaa a right join tablab b on a.id=b.id;
++--------+--------+
+| nombre | nombre |
++--------+--------+
+| A      | W      |
+| B      | X      |
+| C      | Y      |
+| D      | A      |
+| E      | B      |
+| A      | W      |
+| B      | X      |
+| C      | Y      |
+| D      | A      |
+| E      | B      |
++--------+--------+
+10 rows in set (0.0056 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_2  SQL > select * from tablaA left join tablab b on a.nombre = b.nombre where b.nombre is not null
+                                            ... union all
+                                            ... select * from tablab left join tablab b on a.nombre = b.nombre where a.nombre is not null;
+ERROR: 1054 (42S22): Unknown column 'a.nombre' in 'on clause'
+
+ MySQL  localhost:3306 ssl  evaluacion_2  SQL > select * from tablaA left join tablab b on a.nombre = b.nombre where b.nombre is not null union all select * from tablab left join tablaa a on a.nombre = b.nombre where a.nombre is not null;
+ERROR: 1054 (42S22): Unknown column 'a.nombre' in 'on clause'
+                                                select * from tablaA left join tablab b on a.nombre = b.nombre where b.nombre is not null union all select * from tablab left join tablaa a on a.;
+ERROR: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1b left join tablaa a on a.nombre = b.nombre where a.nombr
+ MySQL  localhost:3306 ssl  evaluacion_2  SQL > select * from tablaa a
+                                            ... inner join tablab b on a.nombre=b.nombre;
++----+--------+----+--------+
+| id | nombre | id | nombre |
++----+--------+----+--------+
+|  1 | A      |  4 | A      |
+|  2 | B      |  5 | B      |
++----+--------+----+--------+
+2 rows in set (0.0028 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_2  SQL > select * from tablaa a
+                                            ... left join tablab b on a.nombre= b.nombre
+                                            ... where b.nombre is null;
++----+--------+------+--------+
+| id | nombre | id   | nombre |
++----+--------+------+--------+
+|  3 | C      | NULL | NULL   |
+|  4 | D      | NULL | NULL   |
+|  5 | E      | NULL | NULL   |
++----+--------+------+--------+
+3 rows in set (0.0030 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_2  SQL > select * from tablaa a  right join tablab b on a.nombre= b.nombre where b.nombre;
+Empty set (0.0606 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_2  SQL > select * from tablaa a  right join tablab b on a.nombre= b.nombre where b.nombre
+                                            ... union all
+                                            ... select * from tablaa a left join tablab b on a.nombre=b.nombre
+                                            ... where b.nombre is null;
++----+--------+------+--------+
+| id | nombre | id   | nombre |
++----+--------+------+--------+
+|  3 | C      | NULL | NULL   |
+|  4 | D      | NULL | NULL   |
+|  5 | E      | NULL | NULL   |
++----+--------+------+--------+
+3 rows in set (0.0051 sec)
+                                                select * from tablaa a  right join tablab b on a.nombre= b.nombre union all select * from tablaa a left join tablab b on a.nombre=b.nombre where b.nombre is null;
++------+--------+------+--------+acion_2  SQL > select * from tablaa a  right join tablab b on a.nombre= b.nombre where b.nombr union all select * from tablaa a left join tablab b on a.nombre=b.nombre where b.nombre is null;| id   | nombre | id   | nombre |
++------+--------+------+--------+
+|    1 | A      |    4 | A      |
+|    2 | B      |    5 | B      |
+| NULL | NULL   |    1 | W      |
+| NULL | NULL   |    2 | X      |
+| NULL | NULL   |    3 | Y      |
+|    3 | C      | NULL | NULL   |
+|    4 | D      | NULL | NULL   |
+|    5 | E      | NULL | NULL   |
++------+--------+------+--------+
+8 rows in set (0.0026 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_2  SQL > select * from tablaa a
+                                            ... right join tablab b  on a.nombre = b.nombre
+                                            ... union all
+                                            ... select * from tablaa a
+                                            ... left join tablab b on a.nombre= b.nombre
+                                            ... where b.nombre is null;
++------+--------+------+--------+
+| id   | nombre | id   | nombre |
++------+--------+------+--------+
+|    1 | A      |    4 | A      |
+|    2 | B      |    5 | B      |
+| NULL | NULL   |    1 | W      |
+| NULL | NULL   |    2 | X      |
+| NULL | NULL   |    3 | Y      |
+|    3 | C      | NULL | NULL   |
+|    4 | D      | NULL | NULL   |
+|    5 | E      | NULL | NULL   |
++------+--------+------+--------+
+8 rows in set (0.0044 sec)
+
+ MySQL  localhost:3306 ssl  evaluacion_2  SQL >
+
+select a.orderid, b.customerid, b.companyname from orders a
+left join customers b on a.customerid = b.customerid
+union all
+select a.orderid, b.customerid, b.companyname from orders a
+right join customers b on a.customerid = b.customerid
+where b.customerid is null;
+
+|   10637 | QUEEN      | Queen Cozinha                      |
+|   10659 | QUEEN      | Queen Cozinha                      |
+|   10704 | QUEEN      | Queen Cozinha                      |
+|   10728 | QUEEN      | Queen Cozinha                      |
+|   10786 | QUEEN      | Queen Cozinha                      |
+|   10868 | QUEEN      | Queen Cozinha                      |
+|   10913 | QUEEN      | Queen Cozinha                      |
+|   10914 | QUEEN      | Queen Cozinha                      |
+|   10961 | QUEEN      | Queen Cozinha                      |
+|   11068 | QUEEN      | Queen Cozinha                      |
+|   10273 | QUICK      | QUICK-Stop                         |
+|   10285 | QUICK      | QUICK-Stop                         |
+|   10286 | QUICK      | QUICK-Stop                         |
+|   10313 | QUICK      | QUICK-Stop                         |
+|   10345 | QUICK      | QUICK-Stop                         |
+|   10361 | QUICK      | QUICK-Stop                         |
+|   10418 | QUICK      | QUICK-Stop                         |
+|   10451 | QUICK      | QUICK-Stop                         |
+|   10515 | QUICK      | QUICK-Stop                         |
+|   10527 | QUICK      | QUICK-Stop                         |
+|   10540 | QUICK      | QUICK-Stop                         |
+|   10549 | QUICK      | QUICK-Stop                         |
+|   10588 | QUICK      | QUICK-Stop                         |
+|   10658 | QUICK      | QUICK-Stop                         |
+|   10691 | QUICK      | QUICK-Stop                         |
+|   10694 | QUICK      | QUICK-Stop                         |
+|   10721 | QUICK      | QUICK-Stop                         |
+|   10745 | QUICK      | QUICK-Stop                         |
+|   10765 | QUICK      | QUICK-Stop                         |
+|   10788 | QUICK      | QUICK-Stop                         |
+|   10845 | QUICK      | QUICK-Stop                         |
+|   10865 | QUICK      | QUICK-Stop                         |
+|   10878 | QUICK      | QUICK-Stop                         |
+|   10938 | QUICK      | QUICK-Stop                         |
+|   10962 | QUICK      | QUICK-Stop                         |
+|   10991 | QUICK      | QUICK-Stop                         |
+|   10996 | QUICK      | QUICK-Stop                         |
+|   11021 | QUICK      | QUICK-Stop                         |
+|   10448 | RANCH      | Rancho grande                      |
+|   10716 | RANCH      | Rancho grande                      |
+|   10828 | RANCH      | Rancho grande                      |
+|   10916 | RANCH      | Rancho grande                      |
+|   11019 | RANCH      | Rancho grande                      |
+|   10262 | RATTC      | Rattlesnake Canyon Grocery         |
+|   10272 | RATTC      | Rattlesnake Canyon Grocery         |
+|   10294 | RATTC      | Rattlesnake Canyon Grocery         |
+|   10314 | RATTC      | Rattlesnake Canyon Grocery         |
+|   10316 | RATTC      | Rattlesnake Canyon Grocery         |
+|   10346 | RATTC      | Rattlesnake Canyon Grocery         |
+|   10401 | RATTC      | Rattlesnake Canyon Grocery         |
+|   10479 | RATTC      | Rattlesnake Canyon Grocery         |
+|   10564 | RATTC      | Rattlesnake Canyon Grocery         |
+|   10569 | RATTC      | Rattlesnake Canyon Grocery         |
+|   10598 | RATTC      | Rattlesnake Canyon Grocery         |
+|   10761 | RATTC      | Rattlesnake Canyon Grocery         |
+|   10820 | RATTC      | Rattlesnake Canyon Grocery         |
+|   10852 | RATTC      | Rattlesnake Canyon Grocery         |
+|   10889 | RATTC      | Rattlesnake Canyon Grocery         |
+|   10988 | RATTC      | Rattlesnake Canyon Grocery         |
+|   11000 | RATTC      | Rattlesnake Canyon Grocery         |
+|   11077 | RATTC      | Rattlesnake Canyon Grocery         |
+|   10288 | REGGC      | Reggiani Caseifici                 |
+|   10428 | REGGC      | Reggiani Caseifici                 |
+|   10443 | REGGC      | Reggiani Caseifici                 |
+|   10562 | REGGC      | Reggiani Caseifici                 |
+|   10586 | REGGC      | Reggiani Caseifici                 |
+|   10655 | REGGC      | Reggiani Caseifici                 |
+|   10727 | REGGC      | Reggiani Caseifici                 |
+|   10812 | REGGC      | Reggiani Caseifici                 |
+|   10908 | REGGC      | Reggiani Caseifici                 |
+|   10942 | REGGC      | Reggiani Caseifici                 |
+|   11010 | REGGC      | Reggiani Caseifici                 |
+|   11062 | REGGC      | Reggiani Caseifici                 |
+|   10287 | RICAR      | Ricardo Adocicados                 |
+|   10299 | RICAR      | Ricardo Adocicados                 |
+|   10447 | RICAR      | Ricardo Adocicados                 |
+|   10481 | RICAR      | Ricardo Adocicados                 |
+|   10563 | RICAR      | Ricardo Adocicados                 |
+|   10622 | RICAR      | Ricardo Adocicados                 |
+|   10648 | RICAR      | Ricardo Adocicados                 |
+|   10813 | RICAR      | Ricardo Adocicados                 |
+|   10851 | RICAR      | Ricardo Adocicados                 |
+|   10877 | RICAR      | Ricardo Adocicados                 |
+|   11059 | RICAR      | Ricardo Adocicados                 |
+|   10255 | RICSU      | Richter Supermarkt                 |
+|   10419 | RICSU      | Richter Supermarkt                 |
+|   10537 | RICSU      | Richter Supermarkt                 |
+|   10666 | RICSU      | Richter Supermarkt                 |
+|   10751 | RICSU      | Richter Supermarkt                 |
+|   10758 | RICSU      | Richter Supermarkt                 |
+|   10931 | RICSU      | Richter Supermarkt                 |
+|   10951 | RICSU      | Richter Supermarkt                 |
+|   11033 | RICSU      | Richter Supermarkt                 |
+|   11075 | RICSU      | Richter Supermarkt                 |
+|   10281 | ROMEY      | Romero y tomillo                   |
+|   10282 | ROMEY      | Romero y tomillo                   |
+|   10306 | ROMEY      | Romero y tomillo                   |
+|   10917 | ROMEY      | Romero y tomillo                   |
+|   11013 | ROMEY      | Romero y tomillo                   |
+|   10387 | SANTG      | Sant Gourmet                       |
+|   10520 | SANTG      | Sant Gourmet                       |
+|   10639 | SANTG      | Sant Gourmet                       |
+|   10831 | SANTG      | Sant Gourmet                       |
+|   10909 | SANTG      | Sant Gourmet                       |
+|   11015 | SANTG      | Sant Gourmet                       |
+|   10324 | SAVEA      | Save-a-lot Markets                 |
+|   10393 | SAVEA      | Save-a-lot Markets                 |
+|   10398 | SAVEA      | Save-a-lot Markets                 |
+|   10440 | SAVEA      | Save-a-lot Markets                 |
+|   10452 | SAVEA      | Save-a-lot Markets                 |
+|   10510 | SAVEA      | Save-a-lot Markets                 |
+|   10555 | SAVEA      | Save-a-lot Markets                 |
+|   10603 | SAVEA      | Save-a-lot Markets                 |
+|   10607 | SAVEA      | Save-a-lot Markets                 |
+|   10612 | SAVEA      | Save-a-lot Markets                 |
+|   10627 | SAVEA      | Save-a-lot Markets                 |
+|   10657 | SAVEA      | Save-a-lot Markets                 |
+|   10678 | SAVEA      | Save-a-lot Markets                 |
+|   10700 | SAVEA      | Save-a-lot Markets                 |
+|   10711 | SAVEA      | Save-a-lot Markets                 |
+|   10713 | SAVEA      | Save-a-lot Markets                 |
+|   10714 | SAVEA      | Save-a-lot Markets                 |
+|   10722 | SAVEA      | Save-a-lot Markets                 |
+|   10748 | SAVEA      | Save-a-lot Markets                 |
+|   10757 | SAVEA      | Save-a-lot Markets                 |
+|   10815 | SAVEA      | Save-a-lot Markets                 |
+|   10847 | SAVEA      | Save-a-lot Markets                 |
+|   10882 | SAVEA      | Save-a-lot Markets                 |
+|   10894 | SAVEA      | Save-a-lot Markets                 |
+|   10941 | SAVEA      | Save-a-lot Markets                 |
+|   10983 | SAVEA      | Save-a-lot Markets                 |
+|   10984 | SAVEA      | Save-a-lot Markets                 |
+|   11002 | SAVEA      | Save-a-lot Markets                 |
+|   11030 | SAVEA      | Save-a-lot Markets                 |
+|   11031 | SAVEA      | Save-a-lot Markets                 |
+|   11064 | SAVEA      | Save-a-lot Markets                 |
+|   10359 | SEVES      | Seven Seas Imports                 |
+|   10377 | SEVES      | Seven Seas Imports                 |
+|   10388 | SEVES      | Seven Seas Imports                 |
+|   10472 | SEVES      | Seven Seas Imports                 |
+|   10523 | SEVES      | Seven Seas Imports                 |
+|   10547 | SEVES      | Seven Seas Imports                 |
+|   10800 | SEVES      | Seven Seas Imports                 |
+|   10804 | SEVES      | Seven Seas Imports                 |
+|   10869 | SEVES      | Seven Seas Imports                 |
+|   10341 | SIMOB      | Simons bistro                      |
+|   10417 | SIMOB      | Simons bistro                      |
+|   10556 | SIMOB      | Simons bistro                      |
+|   10642 | SIMOB      | Simons bistro                      |
+|   10669 | SIMOB      | Simons bistro                      |
+|   10802 | SIMOB      | Simons bistro                      |
+|   11074 | SIMOB      | Simons bistro                      |
+|   10738 | SPECD      | Spcialits du monde                 |
+|   10907 | SPECD      | Spcialits du monde                 |
+|   10964 | SPECD      | Spcialits du monde                 |
+|   11043 | SPECD      | Spcialits du monde                 |
+|   10271 | SPLIR      | Split Rail Beer & Ale              |
+|   10329 | SPLIR      | Split Rail Beer & Ale              |
+|   10349 | SPLIR      | Split Rail Beer & Ale              |
+|   10369 | SPLIR      | Split Rail Beer & Ale              |
+|   10385 | SPLIR      | Split Rail Beer & Ale              |
+|   10432 | SPLIR      | Split Rail Beer & Ale              |
+|   10756 | SPLIR      | Split Rail Beer & Ale              |
+|   10821 | SPLIR      | Split Rail Beer & Ale              |
+|   10974 | SPLIR      | Split Rail Beer & Ale              |
+|   10252 | SUPRD      | Suprmes dlices                     |
+|   10302 | SUPRD      | Suprmes dlices                     |
+|   10458 | SUPRD      | Suprmes dlices                     |
+|   10463 | SUPRD      | Suprmes dlices                     |
+|   10475 | SUPRD      | Suprmes dlices                     |
+|   10767 | SUPRD      | Suprmes dlices                     |
+|   10841 | SUPRD      | Suprmes dlices                     |
+|   10846 | SUPRD      | Suprmes dlices                     |
+|   10885 | SUPRD      | Suprmes dlices                     |
+|   10930 | SUPRD      | Suprmes dlices                     |
+|   11035 | SUPRD      | Suprmes dlices                     |
+|   11038 | SUPRD      | Suprmes dlices                     |
+|   10310 | THEBI      | The Big Cheese                     |
+|   10708 | THEBI      | The Big Cheese                     |
+|   10805 | THEBI      | The Big Cheese                     |
+|   10992 | THEBI      | The Big Cheese                     |
+|   10624 | THECR      | The Cracker Box                    |
+|   10775 | THECR      | The Cracker Box                    |
+|   11003 | THECR      | The Cracker Box                    |
+|   10249 | TOMSP      | Toms Spezialitten                  |
+|   10438 | TOMSP      | Toms Spezialitten                  |
+|   10446 | TOMSP      | Toms Spezialitten                  |
+|   10548 | TOMSP      | Toms Spezialitten                  |
+|   10608 | TOMSP      | Toms Spezialitten                  |
+|   10967 | TOMSP      | Toms Spezialitten                  |
+|   10276 | TORTU      | Tortuga Restaurante                |
+|   10293 | TORTU      | Tortuga Restaurante                |
+|   10304 | TORTU      | Tortuga Restaurante                |
+|   10319 | TORTU      | Tortuga Restaurante                |
+|   10518 | TORTU      | Tortuga Restaurante                |
+|   10576 | TORTU      | Tortuga Restaurante                |
+|   10676 | TORTU      | Tortuga Restaurante                |
+|   10842 | TORTU      | Tortuga Restaurante                |
+|   10915 | TORTU      | Tortuga Restaurante                |
+|   11069 | TORTU      | Tortuga Restaurante                |
+|   10292 | TRADH      | Tradio Hipermercados               |
+|   10496 | TRADH      | Tradio Hipermercados               |
+|   10606 | TRADH      | Tradio Hipermercados               |
+|   10830 | TRADH      | Tradio Hipermercados               |
+|   10834 | TRADH      | Tradio Hipermercados               |
+|   10839 | TRADH      | Tradio Hipermercados               |
+|   10574 | TRAIH      | Trail's Head Gourmet Provisioners  |
+|   10577 | TRAIH      | Trail's Head Gourmet Provisioners  |
+|   10822 | TRAIH      | Trail's Head Gourmet Provisioners  |
+|   10367 | VAFFE      | Vaffeljernet                       |
+|   10399 | VAFFE      | Vaffeljernet                       |
+|   10465 | VAFFE      | Vaffeljernet                       |
+|   10591 | VAFFE      | Vaffeljernet                       |
+|   10602 | VAFFE      | Vaffeljernet                       |
+|   10688 | VAFFE      | Vaffeljernet                       |
+|   10744 | VAFFE      | Vaffeljernet                       |
+|   10769 | VAFFE      | Vaffeljernet                       |
+|   10921 | VAFFE      | Vaffeljernet                       |
+|   10946 | VAFFE      | Vaffeljernet                       |
+|   10994 | VAFFE      | Vaffeljernet                       |
+|   10251 | VICTE      | Victuailles en stock               |
+|   10334 | VICTE      | Victuailles en stock               |
+|   10450 | VICTE      | Victuailles en stock               |
+|   10459 | VICTE      | Victuailles en stock               |
+|   10478 | VICTE      | Victuailles en stock               |
+|   10546 | VICTE      | Victuailles en stock               |
+|   10806 | VICTE      | Victuailles en stock               |
+|   10814 | VICTE      | Victuailles en stock               |
+|   10843 | VICTE      | Victuailles en stock               |
+|   10850 | VICTE      | Victuailles en stock               |
+|   10248 | VINET      | Vins et alcools Chevalier          |
+|   10274 | VINET      | Vins et alcools Chevalier          |
+|   10295 | VINET      | Vins et alcools Chevalier          |
+|   10737 | VINET      | Vins et alcools Chevalier          |
+|   10739 | VINET      | Vins et alcools Chevalier          |
+|   10301 | WANDK      | Die Wandernde Kuh                  |
+|   10312 | WANDK      | Die Wandernde Kuh                  |
+|   10348 | WANDK      | Die Wandernde Kuh                  |
+|   10356 | WANDK      | Die Wandernde Kuh                  |
+|   10513 | WANDK      | Die Wandernde Kuh                  |
+|   10632 | WANDK      | Die Wandernde Kuh                  |
+|   10640 | WANDK      | Die Wandernde Kuh                  |
+|   10651 | WANDK      | Die Wandernde Kuh                  |
+|   10668 | WANDK      | Die Wandernde Kuh                  |
+|   11046 | WANDK      | Die Wandernde Kuh                  |
+|   10266 | WARTH      | Wartian Herkku                     |
+|   10270 | WARTH      | Wartian Herkku                     |
+|   10320 | WARTH      | Wartian Herkku                     |
+|   10333 | WARTH      | Wartian Herkku                     |
+|   10412 | WARTH      | Wartian Herkku                     |
+|   10416 | WARTH      | Wartian Herkku                     |
+|   10437 | WARTH      | Wartian Herkku                     |
+|   10455 | WARTH      | Wartian Herkku                     |
+|   10526 | WARTH      | Wartian Herkku                     |
+|   10553 | WARTH      | Wartian Herkku                     |
+|   10583 | WARTH      | Wartian Herkku                     |
+|   10750 | WARTH      | Wartian Herkku                     |
+|   10781 | WARTH      | Wartian Herkku                     |
+|   11025 | WARTH      | Wartian Herkku                     |
+|   10256 | WELLI      | Wellington Importadora             |
+|   10420 | WELLI      | Wellington Importadora             |
+|   10585 | WELLI      | Wellington Importadora             |
+|   10644 | WELLI      | Wellington Importadora             |
+|   10803 | WELLI      | Wellington Importadora             |
+|   10809 | WELLI      | Wellington Importadora             |
+|   10900 | WELLI      | Wellington Importadora             |
+|   10905 | WELLI      | Wellington Importadora             |
+|   10935 | WELLI      | Wellington Importadora             |
+|   10269 | WHITC      | White Clover Markets               |
+|   10344 | WHITC      | White Clover Markets               |
+|   10469 | WHITC      | White Clover Markets               |
+|   10483 | WHITC      | White Clover Markets               |
+|   10504 | WHITC      | White Clover Markets               |
+|   10596 | WHITC      | White Clover Markets               |
+|   10693 | WHITC      | White Clover Markets               |
+|   10696 | WHITC      | White Clover Markets               |
+|   10723 | WHITC      | White Clover Markets               |
+|   10740 | WHITC      | White Clover Markets               |
+|   10861 | WHITC      | White Clover Markets               |
+|   10904 | WHITC      | White Clover Markets               |
+|   11032 | WHITC      | White Clover Markets               |
+|   11066 | WHITC      | White Clover Markets               |
+|   10615 | WILMK      | Wilman Kala                        |
+|   10673 | WILMK      | Wilman Kala                        |
+|   10695 | WILMK      | Wilman Kala                        |
+|   10873 | WILMK      | Wilman Kala                        |
+|   10879 | WILMK      | Wilman Kala                        |
+|   10910 | WILMK      | Wilman Kala                        |
+|   11005 | WILMK      | Wilman Kala                        |
+|   10374 | WOLZA      | Wolski  Zajazd                     |
+|   10611 | WOLZA      | Wolski  Zajazd                     |
+|   10792 | WOLZA      | Wolski  Zajazd                     |
+|   10870 | WOLZA      | Wolski  Zajazd                     |
+|   10906 | WOLZA      | Wolski  Zajazd                     |
+|   10998 | WOLZA      | Wolski  Zajazd                     |
+|   11044 | WOLZA      | Wolski  Zajazd                     |
++---------+------------+------------------------------------+
+830 rows in set (0.0598 sec)
+
+ MySQL  localhost:3306 ssl  northwind  SQL >
+
